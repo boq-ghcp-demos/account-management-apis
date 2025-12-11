@@ -1,0 +1,1306 @@
+openapi: 3.0.3
+info:
+  title: Comprehensive Banking Account Management API
+  description: |-
+    A comprehensive banking API for account management operations with strict regulatory compliance.
+    
+    ## Features:
+    - Full CRUD operations for banking accounts
+    - OAuth 2.0 and API key authentication
+    - Comprehensive input validation and sanitization
+    - Audit logging for all operations
+    - Banking-specific error codes and handling
+    - Idempotency support for financial operations
+    - Rate limiting and security headers
+    - Customer authorization validation
+    - Regulatory compliance (PCI-DSS, PSD2, Open Banking)
+    
+    ## Security:
+    - All endpoints require OAuth 2.0 authentication
+    - API key validation for additional security layer
+    - Customer-ID header validation against authenticated user
+    - Comprehensive audit trail logging
+    - Input sanitization to prevent injection attacks
+    
+  version: 2.0.0
+  contact:
+    name: Banking API Team
+    email: api-support@banking.com
+  license:
+    name: Banking API License
+    url: https://api.banking.com/license
+  termsOfService: https://api.banking.com/terms
+
+servers:
+  - url: https://api.banking.com/v2
+    description: Production server
+  - url: https://staging.api.banking.com/v2
+    description: Staging server
+  - url: https://sandbox.api.banking.com/v2
+    description: Sandbox server
+
+security:
+  - bankingOAuth2: []
+  - apiKeyAuth: []
+
+tags:
+  - name: Account Management
+    description: Core account management operations
+  - name: Account Operations
+    description: Additional account operations
+  - name: Audit & Compliance
+    description: Audit and compliance related endpoints
+
+paths:
+  /accounts:
+    get:
+      tags:
+        - Account Management
+      summary: List customer accounts
+      description: |-
+        Retrieve a paginated list of accounts for the authenticated customer.
+        Includes comprehensive filtering, sorting, and audit logging.
+      operationId: listAccounts
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: account-type
+          in: query
+          description: Filter by account type
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AccountType'
+        - name: status
+          in: query
+          description: Filter by account status
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AccountStatus'
+        - name: currency
+          in: query
+          description: Filter by currency code
+          required: false
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+            example: USD
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          description: Sort field and direction
+          required: false
+          schema:
+            type: string
+            enum: [createdAt:asc, createdAt:desc, balance:asc, balance:desc, accountType:asc, accountType:desc]
+            default: createdAt:desc
+      responses:
+        '200':
+          description: List of accounts retrieved successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:read]
+        - apiKeyAuth: []
+        
+    post:
+      tags:
+        - Account Management
+      summary: Create new account
+      description: |-
+        Creates a new banking account with comprehensive validation and audit logging.
+        Supports idempotency for safe retry operations.
+      operationId: createAccount
+      parameters:
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        description: Account creation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:write]
+        - apiKeyAuth: []
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Account Management
+      summary: Get account details
+      description: |-
+        Retrieve detailed information for a specific account.
+        Includes transaction summary and compliance data.
+      operationId: getAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: include-balance
+          in: query
+          description: Include current balance in response
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: include-transactions
+          in: query
+          description: Include recent transactions summary
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Account details retrieved successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:read]
+        - apiKeyAuth: []
+
+    put:
+      tags:
+        - Account Management
+      summary: Update account
+      description: |-
+        Update account information with comprehensive validation.
+        Supports partial updates and maintains audit trail.
+      operationId: updateAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        description: Account update request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountRequest'
+      responses:
+        '200':
+          description: Account updated successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:write]
+        - apiKeyAuth: []
+
+    delete:
+      tags:
+        - Account Management
+      summary: Close/Delete account
+      description: |-
+        Close or delete an account with proper compliance checks.
+        Includes validation for outstanding balances and regulatory requirements.
+      operationId: deleteAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: closure-reason
+          in: query
+          description: Reason for account closure
+          required: true
+          schema:
+            $ref: '#/components/schemas/ClosureReason'
+        - name: force-closure
+          in: query
+          description: Force closure even with outstanding balance
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '204':
+          description: Account closed/deleted successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:delete]
+        - apiKeyAuth: []
+
+  /accounts/{accountId}/freeze:
+    post:
+      tags:
+        - Account Operations
+      summary: Freeze account
+      description: |-
+        Freeze an account to prevent transactions.
+        Requires specific authorization and audit logging.
+      operationId: freezeAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+      requestBody:
+        description: Freeze account request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountFreezeRequest'
+      responses:
+        '200':
+          description: Account frozen successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:freeze]
+        - apiKeyAuth: []
+
+  /accounts/{accountId}/unfreeze:
+    post:
+      tags:
+        - Account Operations
+      summary: Unfreeze account
+      description: |-
+        Unfreeze a previously frozen account.
+        Requires additional authorization checks.
+      operationId: unfreezeAccount
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+      requestBody:
+        description: Unfreeze account request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUnfreezeRequest'
+      responses:
+        '200':
+          description: Account unfrozen successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [accounts:freeze]
+        - apiKeyAuth: []
+
+  /audit/accounts/{accountId}/activities:
+    get:
+      tags:
+        - Audit & Compliance
+      summary: Get account audit trail
+      description: |-
+        Retrieve audit trail for account activities.
+        Includes all modifications and access logs.
+      operationId: getAccountAuditTrail
+      parameters:
+        - $ref: '#/components/parameters/AccountIdPath'
+        - $ref: '#/components/parameters/CustomerIdHeader'
+        - $ref: '#/components/parameters/RequestIdHeader'
+        - name: from-date
+          in: query
+          description: Start date for audit trail (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to-date
+          in: query
+          description: End date for audit trail (ISO 8601 format)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: activity-type
+          in: query
+          description: Filter by activity type
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AuditActivityType'
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Audit trail retrieved successfully
+          headers:
+            $ref: '#/components/headers/SecurityHeaders'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditTrailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - bankingOAuth2: [audit:read]
+        - apiKeyAuth: []
+
+components:
+  securitySchemes:
+    bankingOAuth2:
+      type: oauth2
+      description: OAuth2 security scheme for banking API
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.banking.com/oauth2/authorize
+          tokenUrl: https://auth.banking.com/oauth2/token
+          refreshUrl: https://auth.banking.com/oauth2/refresh
+          scopes:
+            accounts:read: Read access to account information
+            accounts:write: Write access to create and update accounts
+            accounts:delete: Permission to close/delete accounts
+            accounts:freeze: Permission to freeze/unfreeze accounts
+            audit:read: Read access to audit logs
+        clientCredentials:
+          tokenUrl: https://auth.banking.com/oauth2/token
+          scopes:
+            accounts:read: Read access to account information
+            accounts:write: Write access to create and update accounts
+            accounts:delete: Permission to close/delete accounts
+            accounts:freeze: Permission to freeze/unfreeze accounts
+            audit:read: Read access to audit logs
+
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for additional authentication layer
+
+  parameters:
+    AccountIdPath:
+      name: accountId
+      in: path
+      description: Unique identifier for the account
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440000
+
+    CustomerIdHeader:
+      name: X-Customer-ID
+      in: header
+      description: Customer identifier (must match authenticated user)
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 123e4567-e89b-12d3-a456-426614174000
+
+    RequestIdHeader:
+      name: X-Request-ID
+      in: header
+      description: Unique request identifier for tracing
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 987fcdeb-51a2-43d1-9f12-345678901234
+
+    IdempotencyKeyHeader:
+      name: X-Idempotency-Key
+      in: header
+      description: Idempotency key for safe retry operations
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: abcd1234-5678-90ef-1234-567890abcdef
+
+  headers:
+    SecurityHeaders:
+      X-Content-Type-Options:
+        schema:
+          type: string
+          example: nosniff
+        description: Prevents MIME-sniffing attacks
+      X-Frame-Options:
+        schema:
+          type: string
+          example: DENY
+        description: Prevents clickjacking attacks
+      X-XSS-Protection:
+        schema:
+          type: string
+          example: 1; mode=block
+        description: Enables XSS protection
+      Strict-Transport-Security:
+        schema:
+          type: string
+          example: max-age=31536000; includeSubDomains
+        description: Enforces HTTPS connections
+      X-RateLimit-Limit:
+        schema:
+          type: integer
+          example: 1000
+        description: Request rate limit per hour
+      X-RateLimit-Remaining:
+        schema:
+          type: integer
+          example: 999
+        description: Remaining requests in current period
+      X-RateLimit-Reset:
+        schema:
+          type: integer
+          example: 1640995200
+        description: Time when rate limit resets (Unix timestamp)
+
+  schemas:
+    # Core Account Schemas
+    AccountType:
+      type: string
+      enum: [CHECKING, SAVINGS, MONEY_MARKET, CERTIFICATE_DEPOSIT, LOAN, CREDIT_CARD, INVESTMENT]
+      description: Type of banking account
+
+    AccountStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE, FROZEN, CLOSED, PENDING_APPROVAL, SUSPENDED]
+      description: Current status of the account
+
+    Currency:
+      type: string
+      pattern: '^[A-Z]{3}$'
+      example: USD
+      description: ISO 4217 currency code
+
+    ClosureReason:
+      type: string
+      enum: [CUSTOMER_REQUEST, INACTIVITY, COMPLIANCE_VIOLATION, FRAUD, REGULATORY_REQUIREMENT, BUSINESS_DECISION]
+      description: Reason for account closure
+
+    # Request Schemas
+    CreateAccountRequest:
+      type: object
+      required: [accountType, currency, initialDeposit, customerDetails]
+      properties:
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        initialDeposit:
+          type: number
+          format: decimal
+          minimum: 0
+          multipleOf: 0.01
+          example: 1000.00
+          description: Initial deposit amount
+        customerDetails:
+          $ref: '#/components/schemas/CustomerDetails'
+        accountNickname:
+          type: string
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9\s\-\_\.]+$'
+          example: "My Primary Savings"
+          description: Customer-defined nickname for the account
+        preferences:
+          $ref: '#/components/schemas/AccountPreferences'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional metadata for the account
+      additionalProperties: false
+
+    UpdateAccountRequest:
+      type: object
+      properties:
+        accountNickname:
+          type: string
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9\s\-\_\.]+$'
+          example: "Updated Account Name"
+        preferences:
+          $ref: '#/components/schemas/AccountPreferences'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Updated metadata for the account
+      additionalProperties: false
+
+    AccountFreezeRequest:
+      type: object
+      required: [reason, duration]
+      properties:
+        reason:
+          type: string
+          enum: [FRAUD_INVESTIGATION, CUSTOMER_REQUEST, REGULATORY_HOLD, SUSPICIOUS_ACTIVITY, COURT_ORDER]
+          description: Reason for freezing the account
+        duration:
+          type: string
+          enum: [TEMPORARY, INDEFINITE]
+          description: Duration of the freeze
+        notes:
+          type: string
+          maxLength: 500
+          description: Additional notes for the freeze
+        expirationDate:
+          type: string
+          format: date-time
+          description: Automatic unfreeze date (for temporary freezes)
+      additionalProperties: false
+
+    AccountUnfreezeRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum: [INVESTIGATION_COMPLETE, CUSTOMER_VERIFIED, REGULATORY_CLEARANCE, COURT_ORDER_LIFTED]
+          description: Reason for unfreezing the account
+        notes:
+          type: string
+          maxLength: 500
+          description: Additional notes for the unfreeze
+      additionalProperties: false
+
+    # Response Schemas
+    AccountResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        accountNumber:
+          type: string
+          example: "****1234"
+          description: Masked account number for security
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        balance:
+          $ref: '#/components/schemas/MonetaryAmount'
+        availableBalance:
+          $ref: '#/components/schemas/MonetaryAmount'
+        accountNickname:
+          type: string
+          example: "My Primary Savings"
+        customerId:
+          type: string
+          format: uuid
+        branchId:
+          type: string
+          example: "BR001"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-20T14:45:00Z"
+        lastActivityAt:
+          type: string
+          format: date-time
+          example: "2024-01-20T09:15:00Z"
+        preferences:
+          $ref: '#/components/schemas/AccountPreferences'
+        complianceInfo:
+          $ref: '#/components/schemas/ComplianceInfo'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+      required: [accountId, accountNumber, accountType, status, currency, balance, customerId, createdAt]
+
+    AccountDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/AccountResponse'
+        - type: object
+          properties:
+            transactionSummary:
+              $ref: '#/components/schemas/TransactionSummary'
+            limits:
+              $ref: '#/components/schemas/AccountLimits'
+            linkedAccounts:
+              type: array
+              items:
+                $ref: '#/components/schemas/LinkedAccount'
+
+    AccountListResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+        filters:
+          type: object
+          properties:
+            accountType:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountType'
+            status:
+              type: array
+              items:
+                $ref: '#/components/schemas/AccountStatus'
+            currency:
+              type: string
+        summary:
+          $ref: '#/components/schemas/AccountSummary'
+      required: [accounts, pagination]
+
+    # Supporting Schemas
+    CustomerDetails:
+      type: object
+      required: [firstName, lastName, email, phone]
+      properties:
+        firstName:
+          type: string
+          maxLength: 50
+          pattern: '^[a-zA-Z\s\-\.\']+$'
+          example: "John"
+        lastName:
+          type: string
+          maxLength: 50
+          pattern: '^[a-zA-Z\s\-\.\']+$'
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          example: "john.doe@email.com"
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: "+1234567890"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1990-01-15"
+        address:
+          $ref: '#/components/schemas/Address'
+      additionalProperties: false
+
+    Address:
+      type: object
+      required: [street1, city, postalCode, country]
+      properties:
+        street1:
+          type: string
+          maxLength: 100
+          example: "123 Main Street"
+        street2:
+          type: string
+          maxLength: 100
+          example: "Apt 4B"
+        city:
+          type: string
+          maxLength: 50
+          example: "New York"
+        state:
+          type: string
+          maxLength: 50
+          example: "NY"
+        postalCode:
+          type: string
+          maxLength: 20
+          example: "10001"
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: "US"
+      additionalProperties: false
+
+    MonetaryAmount:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+          multipleOf: 0.01
+          example: 1234.56
+        currency:
+          $ref: '#/components/schemas/Currency'
+      required: [amount, currency]
+
+    AccountPreferences:
+      type: object
+      properties:
+        statementFrequency:
+          type: string
+          enum: [MONTHLY, QUARTERLY, ANNUALLY]
+          default: MONTHLY
+        paperlessStatements:
+          type: boolean
+          default: true
+        notifications:
+          $ref: '#/components/schemas/NotificationPreferences'
+        overdraftProtection:
+          type: boolean
+          default: false
+      additionalProperties: false
+
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          type: boolean
+          default: true
+        sms:
+          type: boolean
+          default: false
+        push:
+          type: boolean
+          default: true
+        lowBalanceThreshold:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 100.00
+      additionalProperties: false
+
+    ComplianceInfo:
+      type: object
+      properties:
+        kycStatus:
+          type: string
+          enum: [VERIFIED, PENDING, REQUIRED, FAILED]
+        amlStatus:
+          type: string
+          enum: [CLEAR, UNDER_REVIEW, FLAGGED]
+        taxReportingStatus:
+          type: string
+          enum: [COMPLIANT, PENDING_DOCS, NON_COMPLIANT]
+        riskRating:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+        lastComplianceCheck:
+          type: string
+          format: date-time
+      required: [kycStatus, amlStatus, taxReportingStatus, riskRating]
+
+    AccountLimits:
+      type: object
+      properties:
+        dailyWithdrawalLimit:
+          $ref: '#/components/schemas/MonetaryAmount'
+        monthlyTransactionLimit:
+          type: integer
+          minimum: 0
+        overdraftLimit:
+          $ref: '#/components/schemas/MonetaryAmount'
+        minimumBalance:
+          $ref: '#/components/schemas/MonetaryAmount'
+
+    TransactionSummary:
+      type: object
+      properties:
+        transactionCount:
+          type: integer
+          minimum: 0
+        lastTransactionDate:
+          type: string
+          format: date-time
+        monthlyDebits:
+          $ref: '#/components/schemas/MonetaryAmount'
+        monthlyCredits:
+          $ref: '#/components/schemas/MonetaryAmount'
+
+    LinkedAccount:
+      type: object
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        accountNumber:
+          type: string
+          example: "****5678"
+        linkType:
+          type: string
+          enum: [OVERDRAFT_PROTECTION, SAVINGS_SWEEP, INVESTMENT_FUNDING]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, PENDING]
+      required: [accountId, accountType, linkType, status]
+
+    AccountSummary:
+      type: object
+      properties:
+        totalAccounts:
+          type: integer
+          minimum: 0
+        totalBalance:
+          $ref: '#/components/schemas/MonetaryAmount'
+        accountsByType:
+          type: object
+          additionalProperties:
+            type: integer
+        accountsByStatus:
+          type: object
+          additionalProperties:
+            type: integer
+
+    # Audit Schemas
+    AuditActivityType:
+      type: string
+      enum: [ACCOUNT_CREATED, ACCOUNT_UPDATED, ACCOUNT_VIEWED, ACCOUNT_FROZEN, ACCOUNT_UNFROZEN, ACCOUNT_CLOSED, BALANCE_INQUIRY, LIMIT_CHANGED, COMPLIANCE_CHECK]
+
+    AuditTrailResponse:
+      type: object
+      properties:
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditActivity'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+      required: [activities, pagination]
+
+    AuditActivity:
+      type: object
+      properties:
+        activityId:
+          type: string
+          format: uuid
+        activityType:
+          $ref: '#/components/schemas/AuditActivityType'
+        timestamp:
+          type: string
+          format: date-time
+        userId:
+          type: string
+          format: uuid
+        userAgent:
+          type: string
+        ipAddress:
+          type: string
+          format: ipv4
+        details:
+          type: object
+          additionalProperties: true
+        result:
+          type: string
+          enum: [SUCCESS, FAILURE, PARTIAL]
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+      required: [activityId, activityType, timestamp, userId, result]
+
+    # Utility Schemas
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          example: 20
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 5
+        totalCount:
+          type: integer
+          minimum: 0
+          example: 87
+        hasNext:
+          type: boolean
+          example: true
+        hasPrevious:
+          type: boolean
+          example: false
+      required: [page, limit, totalPages, totalCount, hasNext, hasPrevious]
+
+    # Error Schemas
+    BankingError:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://api.banking.com/problems/invalid-account-type"
+        title:
+          type: string
+          example: "Invalid Account Type"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "The specified account type is not supported for this operation"
+        instance:
+          type: string
+          format: uri
+          example: "/accounts/550e8400-e29b-41d4-a716-446655440000"
+        code:
+          type: string
+          example: "BANK_E001"
+          description: "Banking-specific error code for precise error identification"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00Z"
+        traceId:
+          type: string
+          format: uuid
+          example: "987fcdeb-51a2-43d1-9f12-345678901234"
+        validationErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+        supportReference:
+          type: string
+          example: "SR-2024-001234"
+      required: [type, title, status, detail, code, timestamp, traceId]
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "accountType"
+        code:
+          type: string
+          example: "INVALID_ENUM_VALUE"
+        message:
+          type: string
+          example: "Value must be one of: CHECKING, SAVINGS, MONEY_MARKET"
+        rejectedValue:
+          type: string
+          example: "INVALID_TYPE"
+      required: [field, code, message]
+
+  responses:
+    BadRequestError:
+      description: Bad Request - Invalid input parameters
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            InvalidAccountType:
+              summary: Invalid account type provided
+              value:
+                type: "https://api.banking.com/problems/invalid-account-type"
+                title: "Invalid Account Type"
+                status: 400
+                detail: "The specified account type 'INVALID_TYPE' is not supported"
+                code: "BANK_E001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    UnauthorizedError:
+      description: Unauthorized - Invalid or missing authentication
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            InvalidToken:
+              summary: Invalid or expired access token
+              value:
+                type: "https://api.banking.com/problems/invalid-token"
+                title: "Invalid Access Token"
+                status: 401
+                detail: "The provided access token is invalid or has expired"
+                code: "BANK_A001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    ForbiddenError:
+      description: Forbidden - Insufficient permissions
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            InsufficientScope:
+              summary: Insufficient OAuth2 scope
+              value:
+                type: "https://api.banking.com/problems/insufficient-scope"
+                title: "Insufficient Permissions"
+                status: 403
+                detail: "The required scope 'accounts:write' is missing from the access token"
+                code: "BANK_A002"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    NotFoundError:
+      description: Not Found - Resource does not exist
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            AccountNotFound:
+              summary: Account not found
+              value:
+                type: "https://api.banking.com/problems/account-not-found"
+                title: "Account Not Found"
+                status: 404
+                detail: "The account with ID '550e8400-e29b-41d4-a716-446655440000' was not found"
+                code: "BANK_R001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    ConflictError:
+      description: Conflict - Resource state conflict
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            AccountAlreadyExists:
+              summary: Account already exists
+              value:
+                type: "https://api.banking.com/problems/account-exists"
+                title: "Account Already Exists"
+                status: 409
+                detail: "An account with the same parameters already exists for this customer"
+                code: "BANK_C001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    UnprocessableEntityError:
+      description: Unprocessable Entity - Business rule violation
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            InsufficientFunds:
+              summary: Insufficient funds for operation
+              value:
+                type: "https://api.banking.com/problems/insufficient-funds"
+                title: "Insufficient Funds"
+                status: 422
+                detail: "The account has insufficient funds to complete this operation"
+                code: "BANK_B001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    TooManyRequestsError:
+      description: Too Many Requests - Rate limit exceeded
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            RateLimitExceeded:
+              summary: API rate limit exceeded
+              value:
+                type: "https://api.banking.com/problems/rate-limit-exceeded"
+                title: "Rate Limit Exceeded"
+                status: 429
+                detail: "API rate limit of 1000 requests per hour has been exceeded"
+                code: "BANK_L001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+
+    InternalServerError:
+      description: Internal Server Error
+      headers:
+        $ref: '#/components/headers/SecurityHeaders'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BankingError'
+          examples:
+            SystemError:
+              summary: Internal system error
+              value:
+                type: "https://api.banking.com/problems/internal-error"
+                title: "Internal Server Error"
+                status: 500
+                detail: "An unexpected error occurred while processing the request"
+                code: "BANK_S001"
+                timestamp: "2024-01-15T10:30:00Z"
+                traceId: "987fcdeb-51a2-43d1-9f12-345678901234"
+                supportReference: "SR-2024-001234"

@@ -1,0 +1,13 @@
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\AccountManagementApisApplication.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\entity\Account.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\AccountType.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\service\AccountService.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\CreateAccountRequest.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\MonetaryAmount.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\UpdateAccountRequest.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\CustomerDetails.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\config\OpenApiConfig.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\controller\SimpleAccountController.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\AccountResponse.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\repository\AccountRepository.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\AccountStatus.java

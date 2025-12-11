@@ -1,0 +1,32 @@
+-------------------------------------------------------------------------------
+Test set: com.banking.accountmanagementapis.controller.SimpleAccountControllerTest
+-------------------------------------------------------------------------------
+Tests run: 16, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.186 s <<< FAILURE! -- in com.banking.accountmanagementapis.controller.SimpleAccountControllerTest
+com.banking.accountmanagementapis.controller.SimpleAccountControllerTest.createAccount_WhenServiceThrowsIllegalArgumentException_ShouldReturn400 -- Time elapsed: 0.012 s <<< FAILURE!
+java.lang.AssertionError: No value at JSON path "$.error"
+	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:302)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:73)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$0(JsonPathResultMatchers.java:87)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.banking.accountmanagementapis.controller.SimpleAccountControllerTest.createAccount_WhenServiceThrowsIllegalArgumentException_ShouldReturn400(SimpleAccountControllerTest.java:273)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.IllegalArgumentException: json can not be null or empty
+	at com.jayway.jsonpath.internal.Utils.notEmpty(Utils.java:401)
+	at com.jayway.jsonpath.JsonPath.read(JsonPath.java:390)
+	at com.jayway.jsonpath.JsonPath.read(JsonPath.java:377)
+	at org.springframework.test.util.JsonPathExpectationsHelper.evaluateJsonPath(JsonPathExpectationsHelper.java:299)
+	... 7 more
+
+com.banking.accountmanagementapis.controller.SimpleAccountControllerTest.createAccount_WithValidRequest_ShouldReturnCreatedAccount -- Time elapsed: 0.011 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<201> but was:<400>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.banking.accountmanagementapis.controller.SimpleAccountControllerTest.createAccount_WithValidRequest_ShouldReturnCreatedAccount(SimpleAccountControllerTest.java:236)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
