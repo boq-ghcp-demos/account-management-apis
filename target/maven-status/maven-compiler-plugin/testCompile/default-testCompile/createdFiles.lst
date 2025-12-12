@@ -1,8 +1,0 @@
-com\banking\accountmanagementapis\integration\AccountManagementIntegrationTest.class
-com\banking\accountmanagementapis\repository\AccountRepositoryTest.class
-com\banking\accountmanagementapis\TestSuite.class
-com\banking\accountmanagementapis\dto\DtoValidationTest.class
-com\banking\accountmanagementapis\service\AccountServiceTest.class
-com\banking\accountmanagementapis\testutil\TestDataGenerator.class
-com\banking\accountmanagementapis\controller\SimpleAccountControllerTest.class
-com\banking\accountmanagementapis\config\TestConfig.class

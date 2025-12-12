@@ -1,13 +1,9 @@
-# GitHub Copilot for Planning Demo Guide
+# GitHub Copilot for Planning using MCP servers Demo Guide
 
 ## 🎯 **Overview**
 
 This demo guide showcases how to leverage GitHub Copilot with Azure DevOps MCP server integration for streamlined project planning and enhancement creation. We'll demonstrate using our BOQ Banking API planning templates to create comprehensive user stories, epics, and tasks in Azure DevOps.
 
-**Demo Duration**: 20-30 minutes  
-**Audience**: Product Managers, Scrum Masters, Developers  
-**Prerequisites**: Azure DevOps access, GitHub Copilot enabled  
-**Repository**: BOQ Account Management APIs  
 
 ---
 
@@ -162,3 +158,6 @@ Based on the multi-currency account user story, generate technical implementatio
 - Deployment considerations
 ```
 
+
+
+MarkItDown MCP Server # https://developer.microsoft.com/blog/10-microsoft-mcp-servers-to-accelerate-your-development-workflow
