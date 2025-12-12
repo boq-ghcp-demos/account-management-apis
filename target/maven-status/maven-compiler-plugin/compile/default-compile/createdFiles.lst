@@ -8,6 +8,7 @@ com\banking\accountmanagementapis\config\OpenApiConfig.class
 com\banking\accountmanagementapis\dto\AccountType.class
 com\banking\accountmanagementapis\dto\MonetaryAmount.class
 com\banking\accountmanagementapis\controller\SimpleAccountController.class
+com\banking\accountmanagementapis\config\SampleDataLoader.class
 com\banking\accountmanagementapis\dto\AccountStatus.class
 com\banking\accountmanagementapis\AccountManagementApisApplication.class
 com\banking\accountmanagementapis\dto\CreateAccountRequest.class

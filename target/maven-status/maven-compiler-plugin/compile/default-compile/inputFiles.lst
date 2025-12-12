@@ -8,6 +8,7 @@ C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementa
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\CustomerDetails.java
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\config\OpenApiConfig.java
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\controller\SimpleAccountController.java
+C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\config\SampleDataLoader.java
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\AccountResponse.java
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\repository\AccountRepository.java
 C:\Ravi\BOQ\account-management-apis\src\main\java\com\banking\accountmanagementapis\dto\AccountStatus.java

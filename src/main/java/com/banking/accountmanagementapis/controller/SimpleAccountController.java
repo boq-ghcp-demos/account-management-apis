@@ -28,7 +28,7 @@ import java.util.UUID;
  * This is a minimal version to get the application running.
  */
 @RestController
-@RequestMapping("/v2/accounts")
+@RequestMapping("/api/accounts")
 @Tag(name = "Account Management", description = "Banking Account Management API endpoints")
 public class SimpleAccountController {
 
