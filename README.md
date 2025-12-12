@@ -20,6 +20,20 @@ The application will start on port 8081.
 
 API documentation is available via Swagger UI at:
 [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
+
+## Sample Data
+
+The application creates sample data on startup. You can use the following customer IDs to interact with the API:
+
+- `customer-001`
+- `customer-002`
+- `customer-003`
+
+### Example: List accounts for a customer
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8081/api/accounts" -Headers @{"X-Customer-ID" = "customer-001"}
+```
 ```bash
 java -jar target/account-management-apis-1.0.0.jar --spring.profiles.active=prod
 ```
