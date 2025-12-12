@@ -1,104 +1,25 @@
-# Banking Account Management API
+# Banking Account Management APIs
 
-Enterprise-grade Java Spring Boot application for comprehensive banking account management with PCI DSS compliance and SOX audit trails.
+This is a simple banking API for account management.
 
-## 🏗️ Architecture Overview
+## How to Run
 
-The application follows a three-tier architecture with comprehensive security, audit logging, and compliance features:
+1.  **Build the project:**
+    ```bash
+    mvn clean install
+    ```
 
-### Key Features
+2.  **Run the application:**
+    ```bash
+    java -jar target/account-management-apis-1.0.0.jar
+    ```
 
-- **Comprehensive Account Management**: Full CRUD operations for banking accounts
-- **OAuth2 + JWT Authentication**: Secure authentication with scope-based authorization
-- **API Key Authentication**: Additional security layer for enhanced protection
-- **Audit Logging**: Complete audit trails for SOX and regulatory compliance
-- **PCI DSS Compliance**: Data masking and secure handling of sensitive information
-- **Rate Limiting**: Protection against abuse and DoS attacks
-- **Response Caching**: 1-minute TTL for balance inquiries for performance optimization
-- **Input Validation**: Comprehensive validation and sanitization
-- **Error Handling**: Banking-specific error codes following RFC 7807
-- **Idempotency**: Safe retry operations with idempotency keys
+The application will start on port 8081.
 
-## 🚀 API Endpoints
+## API Documentation
 
-### Account Management Endpoints
-
-| Method | Endpoint | Description | Required Scopes |
-|--------|----------|-------------|-----------------|
-| `GET` | `/v2/accounts` | List customer accounts with filtering and pagination | `accounts:read` |
-| `GET` | `/v2/accounts/{accountId}` | Get detailed account information | `accounts:read` |
-| `POST` | `/v2/accounts` | Create new account with validation | `accounts:write` |
-
-### Security Requirements
-
-All endpoints require:
-- **OAuth2 Authentication**: Valid JWT token with appropriate scopes
-- **API Key**: `X-API-Key` header for additional security
-- **Customer ID**: `X-Customer-ID` header (must match authenticated user)
-- **Request ID**: `X-Request-ID` header for audit tracing
-
-## 🔧 Technology Stack
-
-- **Java 21** - Latest LTS version with modern features
-- **Spring Boot 3.2** - Enterprise application framework
-- **Spring Security 6** - OAuth2 Resource Server with JWT
-- **Spring Cache** - Caffeine-based caching for performance
-- **Validation API** - Bean validation with custom validators
-- **OpenAPI 3** - Comprehensive API documentation
-- **SLF4J + Logback** - Structured audit logging
-- **Jackson** - JSON processing with security configurations
-
-## 📋 Prerequisites
-
-- Java 21 or higher
-- Maven 3.8 or higher
-- IDE with Spring Boot support (IntelliJ IDEA recommended)
-
-## 🛠️ Setup and Configuration
-
-### 1. Clone and Build
-
-```bash
-git clone <repository-url>
-cd account-management-apis
-mvn clean install
-```
-
-### 2. Environment Configuration
-
-Update `application.properties` with your environment-specific values:
-
-```properties
-# OAuth2 Configuration
-spring.security.oauth2.resourceserver.jwt.issuer-uri=https://your-auth-server.com/oauth2
-spring.security.oauth2.resourceserver.jwt.audiences=banking-api
-
-# Database Configuration (when integrated)
-# spring.datasource.url=jdbc:postgresql://localhost:5432/banking_db
-# spring.datasource.username=${DB_USERNAME}
-# spring.datasource.password=${DB_PASSWORD}
-```
-
-### 3. Security Configuration
-
-Configure OAuth2 scopes and API keys according to your security requirements:
-
-- `accounts:read` - Read access to account information
-- `accounts:write` - Create and update accounts
-- `accounts:delete` - Close/delete accounts
-- `accounts:freeze` - Freeze/unfreeze operations
-- `audit:read` - Access to audit logs
-
-## 🚦 Running the Application
-
-### Development Mode
-
-```bash
-mvn spring-boot:run
-```
-
-### Production Mode
-
+API documentation is available via Swagger UI at:
+[http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
 ```bash
 java -jar target/account-management-apis-1.0.0.jar --spring.profiles.active=prod
 ```
