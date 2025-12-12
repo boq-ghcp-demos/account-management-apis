@@ -121,7 +121,7 @@ Create a complete .NET 8.0 Web API workspace scaffolding for enterprise banking 
 <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
-```
+
 
 ### 2. **Authentication & Security**
 ```xml
@@ -129,14 +129,14 @@ Create a complete .NET 8.0 Web API workspace scaffolding for enterprise banking 
 <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
 <PackageReference Include="Microsoft.Identity.Web" Version="2.15.2" />
 <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
-```
+
 
 ### 3. **Validation & Serialization**
 ```xml
 <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
 <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
 <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-```
+
 
 ### 4. **Logging & Monitoring**
 ```xml
@@ -144,21 +144,21 @@ Create a complete .NET 8.0 Web API workspace scaffolding for enterprise banking 
 <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
 <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-```
+
 
 ### 5. **Health Checks & Resilience**
 ```xml
 <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.0" />
 <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0" />
 <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
-```
+
 
 ### 6. **API Versioning & Documentation**
 ```xml
 <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
 <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
 <PackageReference Include="NSwag.AspNetCore" Version="14.0.0" />
-```
+
 
 ### 7. **Testing Packages (Test Projects)**
 ```xml
@@ -169,12 +169,12 @@ Create a complete .NET 8.0 Web API workspace scaffolding for enterprise banking 
 <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
 <PackageReference Include="Moq" Version="4.20.69" />
 <PackageReference Include="FluentAssertions" Version="6.12.0" />
-```
+
 
 ## Project Structure Scaffold:
 
 ### 1. **Solution Structure**
-```
+
 BankingLoanManagement.sln
 ├── src/
 │   ├── BankingLoanManagement.API/           # Web API Layer
@@ -187,7 +187,7 @@ BankingLoanManagement.sln
 │   └── BankingLoanManagement.API.Tests/
 └── docs/
     └── api/
-```
+
 
 ### 2. **API Layer (Controllers & Configuration)**
 - **Empty Controller Classes**:
@@ -323,12 +323,7 @@ bld/
 packages/
 ```
 
-### 2. **Docker Support**
-- `Dockerfile` - Multi-stage build configuration
-- `docker-compose.yml` - Local development setup with SQL Server
-- `.dockerignore` - Docker build exclusions
-
-### 3. **Development Tools Configuration**
+### 2. **Development Tools Configuration**
 - `launchSettings.json` - Development server configuration
 - `global.json` - SDK version pinning
 - `.editorconfig` - Code formatting rules
